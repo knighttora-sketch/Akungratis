@@ -165,7 +165,7 @@
         // --- DEBUG FUNCTION ---
         window.checkDB = async () => {
             try {
-                const snapshot = await get(ref(db, 'accounts'));
+                const snapshot = await get(ref(db, 'codes/accounts'));
                 if (snapshot.exists()) {
                     const allAccs = snapshot.val();
                     let activeCount = 0;
@@ -224,7 +224,7 @@
                 log("Kode Valid. Mencari Akun...");
 
                 // 2. AMBIL AKUN ACTIVE
-                const accSnapshot = await get(ref(db, 'accounts'));
+                const accSnapshot = await get(ref(db, 'codes/accounts'));
                 let activeAccounts = [];
 
                 if (accSnapshot.exists()) {
