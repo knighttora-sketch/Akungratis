@@ -3,119 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Redeem Akun Premium</title>
+    <title>Redeem Akun + Debug</title>
     <style>
-        /* --- CSS: Desain Tampilan --- */
+        /* CSS Tampilan Utama */
         :root {
-            --primary-color: #6366f1;
-            --primary-hover: #4f46e5;
-            --bg-color: #0f172a;
-            --card-bg: #1e293b;
-            --text-color: #f8fafc;
-            --text-muted: #94a3b8;
-            --success-color: #22c55e;
-            --error-color: #ef4444;
+            --primary: #6366f1; --bg: #0f172a; --card: #1e293b; --text: #f8fafc;
+            --success: #22c55e; --error: #ef4444; --muted: #94a3b8;
         }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
+        body { background: var(--bg); color: var(--text); display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
-
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        /* Status Dot (Hijau/Merah) */
-        .status-container {
-            position: fixed; top: 20px; right: 20px;
-            background: rgba(30, 41, 59, 0.9); padding: 8px 12px; border-radius: 20px;
-            display: flex; align-items: center; gap: 8px; font-size: 0.8rem;
-            border: 1px solid #334155; z-index: 1000;
-        }
-        .status-dot {
-            width: 10px; height: 10px; border-radius: 50%; background-color: #64748b;
-        }
-        .status-dot.online { background-color: var(--success-color); box-shadow: 0 0 8px var(--success-color); }
-        .status-dot.offline { background-color: var(--error-color); }
-        .status-dot.blink { animation: blink 1.5s infinite; }
+        /* Indikator Status */
+        .status-box { position: fixed; top: 20px; right: 20px; background: rgba(30,41,59,0.9); padding: 8px 12px; border-radius: 20px; display: flex; align-items: center; gap: 8px; font-size: 0.8rem; border: 1px solid #334155; z-index: 100; }
+        .dot { width: 10px; height: 10px; border-radius: 50%; background: #64748b; }
+        .dot.online { background: var(--success); box-shadow: 0 0 8px var(--success); }
+        .dot.offline { background: var(--error); }
+        .dot.blink { animation: blink 1s infinite; }
         @keyframes blink { 50% { opacity: 0.4; } }
 
-        /* Kartu Utama */
-        .container {
-            width: 100%; max-width: 400px; background: var(--card-bg);
-            padding: 2rem; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-            text-align: center; border-top: 4px solid var(--primary-color);
-        }
-
+        /* Container */
+        .container { width: 100%; max-width: 400px; background: var(--card); padding: 2rem; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); text-align: center; border-top: 4px solid var(--primary); }
         h1 { margin-bottom: 10px; }
-        p.subtitle { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px; }
-
-        /* Form & Tombol */
+        .subtitle { color: var(--muted); font-size: 0.9rem; margin-bottom: 20px; }
+        
+        /* Form */
         .input-group { text-align: left; margin-bottom: 15px; }
-        label { display: block; font-size: 0.8rem; margin-bottom: 5px; color: var(--text-muted); }
-        input {
-            width: 100%; padding: 12px; background: #334155; border: 1px solid #475569;
-            color: white; border-radius: 6px; outline: none;
-        }
-        button {
-            width: 100%; padding: 12px; background: var(--primary-color); color: white;
-            border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s;
-        }
-        button:hover { background: var(--primary-hover); }
+        label { display: block; font-size: 0.8rem; margin-bottom: 5px; color: var(--muted); }
+        input { width: 100%; padding: 12px; background: #334155; border: 1px solid #475569; color: white; border-radius: 6px; outline: none; }
+        button { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        button:hover { opacity: 0.9; }
         button:disabled { background: #475569; cursor: not-allowed; }
 
-        /* Area Hasil Akun */
-        #result-area {
-            margin-top: 20px; background: #0f172a; padding: 15px; border-radius: 8px;
-            border: 1px solid #334155; text-align: left; display: none; animation: fadeIn 0.3s;
-        }
+        /* Result Area */
+        #result-area { margin-top: 20px; background: #0f172a; padding: 15px; border-radius: 8px; border: 1px solid #334155; text-align: left; display: none; animation: fadeIn 0.3s; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        
-        .account-row { margin-bottom: 10px; }
-        .label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; }
-        .value { font-family: monospace; background: #1e293b; padding: 5px; border-radius: 4px; display: block; word-break: break-all; }
-        
-        /* Toast Notifikasi */
-        .toast {
-            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-            background: #333; color: white; padding: 10px 20px; border-radius: 20px;
-            font-size: 0.9rem; opacity: 0; transition: 0.3s; pointer-events: none;
-        }
-        .toast.show { opacity: 1; bottom: 30px; }
-        .toast.success { background: var(--success-color); }
-        .toast.error { background: var(--error-color); }
+        .row { margin-bottom: 10px; }
+        .label { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; }
+        .val { font-family: monospace; background: #1e293b; padding: 5px; border-radius: 4px; display: block; word-break: break-all; }
 
-        /* Loader */
-        .loader {
-            display: none; width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.3);
-            border-radius: 50%; border-top-color: white; animation: spin 1s linear infinite; margin: 0 auto;
+        /* DEBUG TOOLS (Tombol Bawah) */
+        .debug-tools {
+            position: fixed; bottom: 20px; right: 20px; display: flex; flex-direction: column; gap: 10px;
         }
+        .debug-btn {
+            background: rgba(255,255,255,0.1); color: #ccc; border: 1px solid #444; padding: 8px 12px;
+            border-radius: 6px; font-size: 0.75rem; cursor: pointer; width: auto;
+        }
+        .debug-btn:hover { background: rgba(255,255,255,0.2); color: white; }
+
+        /* Debug Modal / Console */
+        #debug-console {
+            display: none; position: fixed; bottom: 100px; right: 20px; width: 300px; max-height: 200px;
+            background: rgba(0,0,0,0.9); color: #0f0; border: 1px solid #333; padding: 10px;
+            font-family: monospace; font-size: 0.8rem; overflow-y: auto; border-radius: 6px;
+        }
+        .log-item { border-bottom: 1px solid #333; padding: 2px 0; }
+
+        /* Toast */
+        .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 10px 20px; border-radius: 20px; font-size: 0.9rem; opacity: 0; transition: 0.3s; pointer-events: none; z-index: 200; }
+        .toast.show { opacity: 1; }
+        .toast.success { background: var(--success); }
+        .toast.error { background: var(--error); }
+        .toast.info { background: #3b82f6; }
+
+        .loader { display: none; width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: white; animation: spin 1s linear infinite; margin: 0 auto; }
         @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
-    <!-- Indikator Status -->
-    <div class="status-container">
-        <div id="status-dot" class="status-dot blink"></div>
-        <span id="status-text">Cek Koneksi...</span>
+    <!-- Status Koneksi -->
+    <div class="status-box">
+        <div id="status-dot" class="dot blink"></div>
+        <span id="status-text">Connecting...</span>
     </div>
 
-    <!-- Konten Utama -->
+    <!-- Form Utama -->
     <div class="container">
         <h1>Redeem Akun</h1>
-        <p class="subtitle">Masukkan Kode Unik untuk claim akun.</p>
+        <p class="subtitle">Masukkan Kode Redeem</p>
 
         <form id="redeem-form">
             <div class="input-group">
-                <label for="code">Kode Redeem</label>
-                <input type="text" id="code" placeholder="Masukkan kode..." required autocomplete="off">
+                <label>Kode</label>
+                <input type="text" id="code" placeholder="Contoh: VIP123" required autocomplete="off">
             </div>
-            
             <button type="submit" id="submit-btn">
                 <span id="btn-text">Ambil Akun</span>
                 <div class="loader"></div>
@@ -123,29 +95,28 @@
         </form>
 
         <div id="result-area">
-            <h3 style="color: var(--success-color); margin-bottom: 10px;">Berhasil!</h3>
-            <div class="account-row">
-                <div class="label">Email</div>
-                <div class="value" id="res-email">...</div>
-            </div>
-            <div class="account-row">
-                <div class="label">Password</div>
-                <div class="value" id="res-pass">...</div>
-            </div>
+            <h3 style="color:var(--success)">Berhasil!</h3>
+            <div class="row"><div class="label">Email</div><div class="val" id="res-email">...</div></div>
+            <div class="row"><div class="label">Pass</div><div class="val" id="res-pass">...</div></div>
         </div>
     </div>
 
-    <div id="toast" class="toast">Pesan notifikasi</div>
+    <!-- DEBUG CONTROLS -->
+    <div class="debug-tools">
+        <button class="debug-btn" onclick="window.checkDB()">1. Check DB</button>
+        <button class="debug-btn" onclick="window.showCodes()">2. Show Codes</button>
+        <button class="debug-btn" onclick="document.getElementById('debug-console').style.display = 'block'">3. Open Console</button>
+    </div>
 
-    <!-- LOGIKA JAVASCRIPT -->
+    <!-- Console Log Visual -->
+    <div id="debug-console"></div>
+
+    <div id="toast" class="toast">Pesan</div>
+
     <script type="module">
-        // Import Firebase
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
         import { getFirestore, collection, getDocs, query, where, doc, runTransaction, limit } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
-        // ==========================================
-        // PENTING: ISI KONFIGURASI FIREBASE ANDA
-        // ==========================================
         const firebaseConfig = {
             apiKey: "AIzaSyCul8W17gn3ckp1_B6JFfhqYOPfexXilrY",
             authDomain: "fireba-fca1a.firebaseapp.com",
@@ -155,7 +126,11 @@
             appId: "APP_ID"
         };
 
-        // Element UI
+        // Variabel Global agar bisa diakses window function
+        let db;
+        let isConnected = false;
+
+        // Elements
         const statusDot = document.getElementById('status-dot');
         const statusText = document.getElementById('status-text');
         const form = document.getElementById('redeem-form');
@@ -163,113 +138,160 @@
         const loader = document.querySelector('.loader');
         const submitBtn = document.getElementById('submit-btn');
         const resultArea = document.getElementById('result-area');
+        const debugConsole = document.getElementById('debug-console');
 
-        let db;
-        let isConnected = false;
-
-        // Fungsi Ganti Status Warna
-        function setStatus(type) {
-            statusDot.className = 'status-dot';
-            if (type === 'online') {
-                statusDot.classList.add('online');
-                statusText.innerText = "Terhubung";
-                isConnected = true;
-            } else if (type === 'offline') {
-                statusDot.classList.add('offline', 'blink');
-                statusText.innerText = "Gagal";
-                isConnected = false;
-            } else {
-                statusDot.classList.add('blink');
-                statusText.innerText = "Menghubungkan...";
-            }
+        // Logger Sederhana
+        function log(msg) {
+            const div = document.createElement('div');
+            div.className = 'log-item';
+            div.innerText = `> ${msg}`;
+            debugConsole.prepend(div);
+            console.log(msg);
         }
 
-        // Coba Koneksi
-        setStatus('connecting');
+        // Init
         try {
             const app = initializeApp(firebaseConfig);
             db = getFirestore(app);
-            // Tes koneksi ke database
-            await getDocs(query(collection(db, "accounts"), limit(1)));
-            setStatus('online');
+            log("App Initialized");
+            
+            // Cek Koneksi
+            getDocs(query(collection(db, "accounts"), limit(1)))
+                .then(() => {
+                    statusDot.className = 'dot online';
+                    statusText.innerText = "Online";
+                    isConnected = true;
+                    log("DB Connected Successfully");
+                })
+                .catch(e => {
+                    statusDot.className = 'dot offline';
+                    statusText.innerText = "Offline";
+                    log(`DB Error: ${e.message}`);
+                });
         } catch (e) {
-            console.error(e);
-            setStatus('offline');
+            log(`Config Error: ${e.message}`);
+            alert("Config Firebase Salah. Cek Console.");
         }
 
-        // Handle Tombol Submit
+        // --- FUNGSI DEBUG (Window Scope) ---
+        
+        // 1. Cek Database (Apakah collection ada?)
+        window.checkDB = async () => {
+            if(!db) return log("DB not initialized");
+            log("Checking collection 'codes'...");
+            try {
+                const snap = await getDocs(collection(db, "codes"));
+                log(`Success! Found ${snap.size} documents in 'codes'.`);
+                showToast(`Ditemukan ${snap.size} data kode`, "success");
+            } catch (e) {
+                log(`Error reading codes: ${e.message}`);
+                showToast("Gagal baca collection codes", "error");
+            }
+        };
+
+        // 2. Tampilkan Isi Kode (Untuk Admin)
+        window.showCodes = async () => {
+            if(!db) return log("DB not initialized");
+            log("Fetching all codes...");
+            try {
+                const snap = await getDocs(collection(db, "codes"));
+                let output = "";
+                snap.forEach(doc => {
+                    const d = doc.data();
+                    output += `Code: ${d.code} | Status: ${d.status}\n`;
+                });
+                log("Data fetched (Check Alert)");
+                alert(output || "Tidak ada data kode!");
+            } catch (e) {
+                log(`Error fetching: ${e.message}`);
+            }
+        };
+
+        // --- LOGIKA REDEEM ---
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
-            if (!isConnected) return showToast("Database belum terhubung", "error");
+            if (!isConnected) return showToast("Database Offline", "error");
 
             const code = document.getElementById('code').value.trim();
-            if (!code) return showToast("Isi kode dulu!", "error");
+            if(!code) return showToast("Isi kode", "error");
 
             setLoading(true);
+            log(`Trying to redeem code: ${code}`);
 
             try {
-                // 1. Cek Kode (Jika collection 'codes' ada)
-                const qCode = query(collection(db, "codes"), where("code", "==", code), where("status", "==", "active"), limit(1));
-                const snapCode = await getDocs(qCode);
+                // Cek Kode
+                const q = query(collection(db, "codes"), where("code", "==", code), where("status", "==", "active"), limit(1));
+                const snap = await getDocs(q);
 
-                if (snapCode.empty) {
-                    showToast("Kode salah atau kadaluarsa", "error");
+                if (snap.empty) {
+                    log(`Code '${code}' not found or inactive.`);
+                    // Debugging: Coba cari tanpa filter status untuk melihat apakah kodenya memang ada tapi statusnya 'used'
+                    const qAll = query(collection(db, "codes"), where("code", "==", code), limit(1));
+                    const snapAll = await getDocs(qAll);
+                    if(!snapAll.empty) {
+                        const statusReal = snapAll.docs[0].data().status;
+                        showToast(`Kode ada, tapi statusnya: ${statusReal}`, "error");
+                        log(`Code exists but status is '${statusReal}'`);
+                    } else {
+                        showToast("Kode tidak ditemukan di database", "error");
+                    }
                     setLoading(false);
                     return;
                 }
-                const codeRef = doc(db, "codes", snapCode.docs[0].id);
 
-                // 2. Ambil Akun Random Active
+                const codeRef = doc(db, "codes", snap.docs[0].id);
+                log("Code is Valid. Fetching Accounts...");
+
+                // Ambil Akun
                 const qAcc = query(collection(db, "accounts"), where("status", "==", "active"), limit(50));
                 const snapAcc = await getDocs(qAcc);
-
+                
                 if (snapAcc.empty) {
-                    showToast("Stok akun habis!", "error");
+                    showToast("Stok Akun Habis", "error");
                     setLoading(false);
                     return;
                 }
 
-                // Ambil random
                 const list = [];
-                snapAcc.forEach(d => list.push({id: d.id, data: d.data()}));
+                snapAcc.forEach(d => list.push({id:d.id, data:d.data()}));
                 const chosen = list[Math.floor(Math.random() * list.length)];
+                
+                log(`Account selected: ${chosen.data.email}`);
 
-                // 3. Update Status (Akun & Kode)
+                // Update Transaksi
                 await runTransaction(db, async (t) => {
                     const accRef = doc(db, "accounts", chosen.id);
                     const accDoc = await t.get(accRef);
-                    if(accDoc.data().status !== "active") throw "Sudah diambil";
-                    
-                    t.update(accRef, { status: "used" });
-                    t.update(codeRef, { status: "used" });
+                    if(accDoc.data().status !== "active") throw "Conflict";
+                    t.update(accRef, {status: "used"});
+                    t.update(codeRef, {status: "used"});
                 });
 
-                // Tampilkan
+                log("Redeem Success!");
                 document.getElementById('res-email').innerText = chosen.data.email;
                 document.getElementById('res-pass').innerText = chosen.data.password;
                 resultArea.style.display = 'block';
-                showToast("Sukses!", "success");
+                showToast("Berhasil!", "success");
                 form.reset();
 
             } catch (err) {
-                console.error(err);
-                showToast("Gagal mengambil akun", "error");
+                log(`Error: ${err.message}`);
+                showToast("Terjadi kesalahan sistem", "error");
             } finally {
                 setLoading(false);
             }
         });
 
-        // Helper Functions
-        function setLoading(load) {
-            submitBtn.disabled = load;
-            btnText.style.display = load ? 'none' : 'block';
-            loader.style.display = load ? 'block' : 'none';
+        // Helpers
+        function setLoading(l) {
+            submitBtn.disabled = l;
+            btnText.style.display = l ? 'none' : 'block';
+            loader.style.display = l ? 'block' : 'none';
         }
 
         window.showToast = (msg, type) => {
             const t = document.getElementById('toast');
-            t.innerText = msg;
-            t.className = `toast show ${type}`;
+            t.innerText = msg; t.className = `toast show ${type}`;
             setTimeout(() => t.classList.remove('show'), 3000);
         };
     </script>
