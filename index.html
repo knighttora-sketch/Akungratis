@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Redeem Akun Premium</title>
     <style>
+        /* --- CSS: Desain Tampilan --- */
         :root {
             --primary-color: #6366f1;
             --primary-hover: #4f46e5;
@@ -14,15 +15,9 @@
             --text-muted: #94a3b8;
             --success-color: #22c55e;
             --error-color: #ef4444;
-            --border-radius: 12px;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
 
         body {
             background-color: var(--bg-color);
@@ -32,190 +27,124 @@
             align-items: center;
             min-height: 100vh;
             padding: 20px;
-            position: relative;
         }
 
-        /* --- Status Indicator Styles --- */
+        /* Status Dot (Hijau/Merah) */
         .status-container {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background: rgba(30, 41, 59, 0.8);
-            padding: 8px 12px;
-            border-radius: 20px;
-            border: 1px solid #334155;
-            backdrop-filter: blur(4px);
-            z-index: 1000;
-            font-size: 0.85rem;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            position: fixed; top: 20px; right: 20px;
+            background: rgba(30, 41, 59, 0.9); padding: 8px 12px; border-radius: 20px;
+            display: flex; align-items: center; gap: 8px; font-size: 0.8rem;
+            border: 1px solid #334155; z-index: 1000;
         }
-
         .status-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background-color: #64748b; /* Default Grey/Disconnected */
-            transition: background-color 0.3s;
+            width: 10px; height: 10px; border-radius: 50%; background-color: #64748b;
         }
+        .status-dot.online { background-color: var(--success-color); box-shadow: 0 0 8px var(--success-color); }
+        .status-dot.offline { background-color: var(--error-color); }
+        .status-dot.blink { animation: blink 1.5s infinite; }
+        @keyframes blink { 50% { opacity: 0.4; } }
 
-        /* Animasi Berkedip untuk Loading/Error */
-        .status-dot.blink {
-            animation: blink-animation 1.5s infinite;
-        }
-
-        @keyframes blink-animation {
-            0% { opacity: 1; }
-            50% { opacity: 0.4; }
-            100% { opacity: 1; }
-        }
-
-        /* Status States */
-        .status-dot.connecting { background-color: #f59e0b; } /* Orange/Loading */
-        .status-dot.online { background-color: var(--success-color); box-shadow: 0 0 8px var(--success-color); } /* Hijau */
-        .status-dot.offline { background-color: var(--error-color); } /* Merah */
-        /* -------------------------------- */
-
+        /* Kartu Utama */
         .container {
-            width: 100%;
-            max-width: 400px;
-            background-color: var(--card-bg);
-            padding: 2rem;
-            border-radius: var(--border-radius);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
-            text-align: center;
-            position: relative;
-            overflow: hidden;
+            width: 100%; max-width: 400px; background: var(--card-bg);
+            padding: 2rem; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            text-align: center; border-top: 4px solid var(--primary-color);
         }
 
-        .container::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 5px;
-            background: linear-gradient(90deg, var(--primary-color), #ec4899);
+        h1 { margin-bottom: 10px; }
+        p.subtitle { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px; }
+
+        /* Form & Tombol */
+        .input-group { text-align: left; margin-bottom: 15px; }
+        label { display: block; font-size: 0.8rem; margin-bottom: 5px; color: var(--text-muted); }
+        input {
+            width: 100%; padding: 12px; background: #334155; border: 1px solid #475569;
+            color: white; border-radius: 6px; outline: none;
         }
-
-        h1 { margin-bottom: 0.5rem; font-size: 1.5rem; font-weight: 700; }
-        p.subtitle { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 2rem; }
-
-        .input-group { margin-bottom: 1.5rem; text-align: left; }
-        label { display: block; margin-bottom: 0.5rem; font-size: 0.85rem; color: var(--text-muted); font-weight: 600; }
-        
-        input[type="text"] {
-            width: 100%;
-            padding: 12px;
-            background-color: #334155;
-            border: 1px solid #475569;
-            border-radius: 8px;
-            color: white;
-            font-size: 1rem;
-            transition: border-color 0.3s;
-        }
-        input[type="text"]:focus { outline: none; border-color: var(--primary-color); }
-
         button {
-            width: 100%;
-            padding: 12px;
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background-color 0.3s, transform 0.1s;
+            width: 100%; padding: 12px; background: var(--primary-color); color: white;
+            border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s;
         }
-        button:hover { background-color: var(--primary-hover); }
-        button:active { transform: scale(0.98); }
-        button:disabled { background-color: #475569; cursor: not-allowed; opacity: 0.7; }
+        button:hover { background: var(--primary-hover); }
+        button:disabled { background: #475569; cursor: not-allowed; }
 
+        /* Area Hasil Akun */
         #result-area {
-            margin-top: 2rem;
-            display: none;
-            background-color: #0f172a;
-            padding: 1.5rem;
-            border-radius: 8px;
-            border: 1px solid #334155;
-            text-align: left;
-            animation: fadeIn 0.5s ease-out;
+            margin-top: 20px; background: #0f172a; padding: 15px; border-radius: 8px;
+            border: 1px solid #334155; text-align: left; display: none; animation: fadeIn 0.3s;
         }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        .account-item { margin-bottom: 1rem; word-break: break-all; }
-        .account-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
-        .account-value { font-family: 'Courier New', Courier, monospace; font-size: 1.1rem; color: var(--text-color); background: #1e293b; padding: 8px; border-radius: 4px; border: 1px solid #334155; }
-        .copy-btn { background: #334155; font-size: 0.8rem; padding: 4px 8px; margin-top: 5px; width: auto; }
-
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        
+        .account-row { margin-bottom: 10px; }
+        .label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; }
+        .value { font-family: monospace; background: #1e293b; padding: 5px; border-radius: 4px; display: block; word-break: break-all; }
+        
+        /* Toast Notifikasi */
         .toast {
             position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-            background-color: #333; color: white; padding: 10px 20px; border-radius: 20px; font-size: 0.9rem;
-            opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 1001;
+            background: #333; color: white; padding: 10px 20px; border-radius: 20px;
+            font-size: 0.9rem; opacity: 0; transition: 0.3s; pointer-events: none;
         }
-        .toast.show { opacity: 1; }
-        .toast.success { background-color: var(--success-color); }
-        .toast.error { background-color: var(--error-color); }
+        .toast.show { opacity: 1; bottom: 30px; }
+        .toast.success { background: var(--success-color); }
+        .toast.error { background: var(--error-color); }
 
+        /* Loader */
         .loader {
-            display: none; border: 3px solid rgba(255,255,255,0.1); border-radius: 50%;
-            border-top: 3px solid white; width: 20px; height: 20px; animation: spin 1s linear infinite; margin: 0 auto;
+            display: none; width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%; border-top-color: white; animation: spin 1s linear infinite; margin: 0 auto;
         }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
-    <!-- Indikator Status Koneksi -->
+    <!-- Indikator Status -->
     <div class="status-container">
         <div id="status-dot" class="status-dot blink"></div>
-        <span id="status-text">Menghubungkan...</span>
+        <span id="status-text">Cek Koneksi...</span>
     </div>
 
+    <!-- Konten Utama -->
     <div class="container">
         <h1>Redeem Akun</h1>
-        <p class="subtitle">Masukkan Kode Unik untuk mendapatkan akun.</p>
+        <p class="subtitle">Masukkan Kode Unik untuk claim akun.</p>
 
         <form id="redeem-form">
             <div class="input-group">
                 <label for="code">Kode Redeem</label>
-                <input type="text" id="code" placeholder="Contoh: PROMO123" required autocomplete="off">
+                <input type="text" id="code" placeholder="Masukkan kode..." required autocomplete="off">
             </div>
             
             <button type="submit" id="submit-btn">
-                <span class="btn-text">Ambil Akun</span>
+                <span id="btn-text">Ambil Akun</span>
                 <div class="loader"></div>
             </button>
         </form>
 
         <div id="result-area">
-            <h3 style="margin-bottom: 15px; color: var(--success-color);">Berhasil Didapatkan!</h3>
-            <div class="account-item">
-                <div class="account-label">Email</div>
-                <div class="account-value" id="res-email">...</div>
-                <button class="copy-btn" onclick="copyText('res-email')">Salin Email</button>
+            <h3 style="color: var(--success-color); margin-bottom: 10px;">Berhasil!</h3>
+            <div class="account-row">
+                <div class="label">Email</div>
+                <div class="value" id="res-email">...</div>
             </div>
-            <div class="account-item">
-                <div class="account-label">Password</div>
-                <div class="account-value" id="res-pass">...</div>
-                <button class="copy-btn" onclick="copyText('res-pass')">Salin Password</button>
+            <div class="account-row">
+                <div class="label">Password</div>
+                <div class="value" id="res-pass">...</div>
             </div>
-            <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 10px;">*Akun hanya bisa diredeem satu kali.</p>
         </div>
     </div>
 
     <div id="toast" class="toast">Pesan notifikasi</div>
 
-    <!-- Firebase SDK -->
+    <!-- LOGIKA JAVASCRIPT -->
     <script type="module">
+        // Import Firebase
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-        import { getFirestore, collection, getDocs, query, where, updateDoc, doc, runTransaction, limit, getDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, query, where, doc, runTransaction, limit } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
         // ==========================================
-        // KONFIGURASI FIREBASE ANDA DI SINI
+        // PENTING: ISI KONFIGURASI FIREBASE ANDA
         // ==========================================
         const firebaseConfig = {
             apiKey: "AIzaSyCul8W17gn3ckp1_B6JFfhqYOPfexXilrY",
@@ -226,159 +155,122 @@
             appId: "APP_ID"
         };
 
-        // Elemen UI Status
+        // Element UI
         const statusDot = document.getElementById('status-dot');
         const statusText = document.getElementById('status-text');
+        const form = document.getElementById('redeem-form');
+        const btnText = document.getElementById('btn-text');
+        const loader = document.querySelector('.loader');
+        const submitBtn = document.getElementById('submit-btn');
+        const resultArea = document.getElementById('result-area');
 
-        let app, db;
+        let db;
         let isConnected = false;
 
-        // Fungsi Update UI Status
-        function setStatus(state) {
-            statusDot.className = 'status-dot'; // Reset class
-            if (state === 'connecting') {
-                statusDot.classList.add('blink', 'connecting');
-                statusText.textContent = "Menghubungkan...";
-                isConnected = false;
-            } else if (state === 'online') {
+        // Fungsi Ganti Status Warna
+        function setStatus(type) {
+            statusDot.className = 'status-dot';
+            if (type === 'online') {
                 statusDot.classList.add('online');
-                statusText.textContent = "Terhubung Firebase";
+                statusText.innerText = "Terhubung";
                 isConnected = true;
-            } else if (state === 'offline') {
-                statusDot.classList.add('blink', 'offline');
-                statusText.textContent = "Koneksi Gagal";
+            } else if (type === 'offline') {
+                statusDot.classList.add('offline', 'blink');
+                statusText.innerText = "Gagal";
                 isConnected = false;
+            } else {
+                statusDot.classList.add('blink');
+                statusText.innerText = "Menghubungkan...";
             }
         }
 
-        // Inisialisasi
+        // Coba Koneksi
         setStatus('connecting');
         try {
-            app = initializeApp(firebaseConfig);
+            const app = initializeApp(firebaseConfig);
             db = getFirestore(app);
-            
-            // LAKUKAN TES KONEKSI (PING)
-            // Kita coba mengambil 1 dokumen sembarang untuk memastikan jaringan dan config benar
-            // Jika query ini sukses, berarti kita online.
-            const testQuery = query(collection(db, "accounts"), limit(1));
-            await getDocs(testQuery); 
-            
+            // Tes koneksi ke database
+            await getDocs(query(collection(db, "accounts"), limit(1)));
             setStatus('online');
-
         } catch (e) {
-            console.error("Gagal koneksi:", e);
+            console.error(e);
             setStatus('offline');
-            showToast("Gagal terhubung ke Database. Cek Config.", "error");
         }
 
-        // Referensi Elemen DOM Form
-        const form = document.getElementById('redeem-form');
-        const codeInput = document.getElementById('code');
-        const submitBtn = document.getElementById('submit-btn');
-        const btnText = document.querySelector('.btn-text');
-        const loader = document.querySelector('.loader');
-        const resultArea = document.getElementById('result-area');
-        const resEmail = document.getElementById('res-email');
-        const resPass = document.getElementById('res-pass');
-
-        function setLoading(isLoading) {
-            if (isLoading) {
-                submitBtn.disabled = true;
-                btnText.style.display = 'none';
-                loader.style.display = 'block';
-            } else {
-                submitBtn.disabled = false;
-                btnText.style.display = 'block';
-                loader.style.display = 'none';
-            }
-        }
-
+        // Handle Tombol Submit
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
-            
-            // Cek koneksi sebelum memproses
-            if (!isConnected) {
-                showToast("Database tidak terhubung. Tunggu sebentar atau refresh.", "error");
-                return;
-            }
+            if (!isConnected) return showToast("Database belum terhubung", "error");
 
-            const inputCode = codeInput.value.trim();
-            if (!inputCode) return;
+            const code = document.getElementById('code').value.trim();
+            if (!code) return showToast("Isi kode dulu!", "error");
 
             setLoading(true);
-            resultArea.style.display = 'none';
 
             try {
-                // 1. Cari akun active
-                const q = query(
-                    collection(db, "accounts"), 
-                    where("status", "==", "active"),
-                    limit(50)
-                );
+                // 1. Cek Kode (Jika collection 'codes' ada)
+                const qCode = query(collection(db, "codes"), where("code", "==", code), where("status", "==", "active"), limit(1));
+                const snapCode = await getDocs(qCode);
 
-                const querySnapshot = await getDocs(q);
-                
-                if (querySnapshot.empty) {
-                    showToast("Maaf, stok akun habis!", "error");
+                if (snapCode.empty) {
+                    showToast("Kode salah atau kadaluarsa", "error");
+                    setLoading(false);
+                    return;
+                }
+                const codeRef = doc(db, "codes", snapCode.docs[0].id);
+
+                // 2. Ambil Akun Random Active
+                const qAcc = query(collection(db, "accounts"), where("status", "==", "active"), limit(50));
+                const snapAcc = await getDocs(qAcc);
+
+                if (snapAcc.empty) {
+                    showToast("Stok akun habis!", "error");
                     setLoading(false);
                     return;
                 }
 
-                // 2. Random Logic
-                const docsArray = [];
-                querySnapshot.forEach(doc => {
-                    docsArray.push({ id: doc.id, data: doc.data() });
+                // Ambil random
+                const list = [];
+                snapAcc.forEach(d => list.push({id: d.id, data: d.data()}));
+                const chosen = list[Math.floor(Math.random() * list.length)];
+
+                // 3. Update Status (Akun & Kode)
+                await runTransaction(db, async (t) => {
+                    const accRef = doc(db, "accounts", chosen.id);
+                    const accDoc = await t.get(accRef);
+                    if(accDoc.data().status !== "active") throw "Sudah diambil";
+                    
+                    t.update(accRef, { status: "used" });
+                    t.update(codeRef, { status: "used" });
                 });
 
-                const randomIndex = Math.floor(Math.random() * docsArray.length);
-                const selectedAccount = docsArray[randomIndex];
-
-                // 3. Transaksi Update (Agar aman dari race condition)
-                await runTransaction(db, async (transaction) => {
-                    const sfDocRef = doc(db, "accounts", selectedAccount.id);
-                    const sfDoc = await transaction.get(sfDocRef);
-                    
-                    if (!sfDoc.exists()) throw "Akun tidak ditemukan!";
-                    if (sfDoc.data().status !== "active") throw "Akun baru saja diambil orang lain.";
-                    
-                    transaction.update(sfDocRef, { status: "used" });
-                });
-
-                // 4. Sukses
-                showToast("Akun berhasil diambil!", "success");
-                resEmail.textContent = selectedAccount.data.email;
-                resPass.textContent = selectedAccount.data.password;
+                // Tampilkan
+                document.getElementById('res-email').innerText = chosen.data.email;
+                document.getElementById('res-pass').innerText = chosen.data.password;
                 resultArea.style.display = 'block';
+                showToast("Sukses!", "success");
                 form.reset();
 
-            } catch (error) {
-                console.error(error);
-                if (error === "Akun baru saja diambil orang lain.") {
-                    showToast(error, "error");
-                } else {
-                    showToast("Terjadi kesalahan sistem.", "error");
-                }
+            } catch (err) {
+                console.error(err);
+                showToast("Gagal mengambil akun", "error");
             } finally {
                 setLoading(false);
             }
         });
 
-        window.copyText = function(elementId) {
-            const text = document.getElementById(elementId).textContent;
-            navigator.clipboard.writeText(text).then(() => {
-                showToast("Teks berhasil disalin!", "success");
-            }).catch(err => {
-                showToast("Gagal menyalin.", "error");
-            });
-        };
+        // Helper Functions
+        function setLoading(load) {
+            submitBtn.disabled = load;
+            btnText.style.display = load ? 'none' : 'block';
+            loader.style.display = load ? 'block' : 'none';
+        }
 
-        window.showToast = function(message, type = "success") {
-            const toast = document.getElementById('toast');
-            toast.textContent = message;
-            toast.className = `toast show ${type}`;
-            setTimeout(() => {
-                toast.className = toast.className.replace("show", "");
-            }, 3000);
+        window.showToast = (msg, type) => {
+            const t = document.getElementById('toast');
+            t.innerText = msg;
+            t.className = `toast show ${type}`;
+            setTimeout(() => t.classList.remove('show'), 3000);
         };
     </script>
 </body>
