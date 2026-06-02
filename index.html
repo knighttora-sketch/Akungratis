@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Redeem Akun + Debug</title>
+    <title>Redeem Akun (Realtime DB)</title>
     <style>
-        /* CSS Tampilan Utama */
+        /* CSS Sama seperti sebelumnya */
         :root {
             --primary: #6366f1; --bg: #0f172a; --card: #1e293b; --text: #f8fafc;
             --success: #22c55e; --error: #ef4444; --muted: #94a3b8;
@@ -13,7 +13,6 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
         body { background: var(--bg); color: var(--text); display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
 
-        /* Indikator Status */
         .status-box { position: fixed; top: 20px; right: 20px; background: rgba(30,41,59,0.9); padding: 8px 12px; border-radius: 20px; display: flex; align-items: center; gap: 8px; font-size: 0.8rem; border: 1px solid #334155; z-index: 100; }
         .dot { width: 10px; height: 10px; border-radius: 50%; background: #64748b; }
         .dot.online { background: var(--success); box-shadow: 0 0 8px var(--success); }
@@ -21,12 +20,10 @@
         .dot.blink { animation: blink 1s infinite; }
         @keyframes blink { 50% { opacity: 0.4; } }
 
-        /* Container */
         .container { width: 100%; max-width: 400px; background: var(--card); padding: 2rem; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); text-align: center; border-top: 4px solid var(--primary); }
         h1 { margin-bottom: 10px; }
         .subtitle { color: var(--muted); font-size: 0.9rem; margin-bottom: 20px; }
         
-        /* Form */
         .input-group { text-align: left; margin-bottom: 15px; }
         label { display: block; font-size: 0.8rem; margin-bottom: 5px; color: var(--muted); }
         input { width: 100%; padding: 12px; background: #334155; border: 1px solid #475569; color: white; border-radius: 6px; outline: none; }
@@ -34,32 +31,19 @@
         button:hover { opacity: 0.9; }
         button:disabled { background: #475569; cursor: not-allowed; }
 
-        /* Result Area */
         #result-area { margin-top: 20px; background: #0f172a; padding: 15px; border-radius: 8px; border: 1px solid #334155; text-align: left; display: none; animation: fadeIn 0.3s; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         .row { margin-bottom: 10px; }
         .label { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; }
         .val { font-family: monospace; background: #1e293b; padding: 5px; border-radius: 4px; display: block; word-break: break-all; }
 
-        /* DEBUG TOOLS (Tombol Bawah) */
-        .debug-tools {
-            position: fixed; bottom: 20px; right: 20px; display: flex; flex-direction: column; gap: 10px;
-        }
-        .debug-btn {
-            background: rgba(255,255,255,0.1); color: #ccc; border: 1px solid #444; padding: 8px 12px;
-            border-radius: 6px; font-size: 0.75rem; cursor: pointer; width: auto;
-        }
+        .debug-tools { position: fixed; bottom: 20px; right: 20px; display: flex; flex-direction: column; gap: 10px; }
+        .debug-btn { background: rgba(255,255,255,0.1); color: #ccc; border: 1px solid #444; padding: 8px 12px; border-radius: 6px; font-size: 0.75rem; cursor: pointer; width: auto; }
         .debug-btn:hover { background: rgba(255,255,255,0.2); color: white; }
-
-        /* Debug Modal / Console */
-        #debug-console {
-            display: none; position: fixed; bottom: 100px; right: 20px; width: 300px; max-height: 200px;
-            background: rgba(0,0,0,0.9); color: #0f0; border: 1px solid #333; padding: 10px;
-            font-family: monospace; font-size: 0.8rem; overflow-y: auto; border-radius: 6px;
-        }
+        
+        #debug-console { display: none; position: fixed; bottom: 100px; right: 20px; width: 300px; max-height: 200px; background: rgba(0,0,0,0.9); color: #0f0; border: 1px solid #333; padding: 10px; font-family: monospace; font-size: 0.8rem; overflow-y: auto; border-radius: 6px; }
         .log-item { border-bottom: 1px solid #333; padding: 2px 0; }
 
-        /* Toast */
         .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 10px 20px; border-radius: 20px; font-size: 0.9rem; opacity: 0; transition: 0.3s; pointer-events: none; z-index: 200; }
         .toast.show { opacity: 1; }
         .toast.success { background: var(--success); }
@@ -72,13 +56,11 @@
 </head>
 <body>
 
-    <!-- Status Koneksi -->
     <div class="status-box">
         <div id="status-dot" class="dot blink"></div>
         <span id="status-text">Connecting...</span>
     </div>
 
-    <!-- Form Utama -->
     <div class="container">
         <h1>Redeem Akun</h1>
         <p class="subtitle">Masukkan Kode Redeem</p>
@@ -101,22 +83,24 @@
         </div>
     </div>
 
-    <!-- DEBUG CONTROLS -->
     <div class="debug-tools">
-        <button class="debug-btn" onclick="window.checkDB()">1. Check DB</button>
-        <button class="debug-btn" onclick="window.showCodes()">2. Show Codes</button>
+        <button class="debug-btn" onclick="window.checkDB()">1. Check Data</button>
+        <button class="debug-btn" onclick="window.showCodes()">2. Lihat Kode</button>
         <button class="debug-btn" onclick="document.getElementById('debug-console').style.display = 'block'">3. Open Console</button>
     </div>
-
-    <!-- Console Log Visual -->
     <div id="debug-console"></div>
 
     <div id="toast" class="toast">Pesan</div>
 
+    <!-- SCRIPT KHUSUS REALTIME DATABASE -->
     <script type="module">
+        // Import SDK Realtime Database (Bukan Firestore!)
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-        import { getFirestore, collection, getDocs, query, where, doc, runTransaction, limit } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+        import { getDatabase, ref, get, update, push } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
 
+        // ==========================================
+        // KONFIGURASI FIREBASE ANDA
+        // ==========================================
         const firebaseConfig = {
             apiKey: "AIzaSyCul8W17gn3ckp1_B6JFfhqYOPfexXilrY",
             authDomain: "fireba-fca1a.firebaseapp.com",
@@ -126,7 +110,6 @@
             appId: "APP_ID"
         };
 
-        // Variabel Global agar bisa diakses window function
         let db;
         let isConnected = false;
 
@@ -140,7 +123,6 @@
         const resultArea = document.getElementById('result-area');
         const debugConsole = document.getElementById('debug-console');
 
-        // Logger Sederhana
         function log(msg) {
             const div = document.createElement('div');
             div.className = 'log-item';
@@ -152,137 +134,158 @@
         // Init
         try {
             const app = initializeApp(firebaseConfig);
-            db = getFirestore(app);
-            log("App Initialized");
-            
-            // Cek Koneksi
-            getDocs(query(collection(db, "accounts"), limit(1)))
-                .then(() => {
+            db = getDatabase(app);
+            log("Realtime DB Initialized");
+
+            // Cek Koneksi (Coba baca info server)
+            const dbRef = ref(db);
+            get(dbRef).then((snapshot) => {
+                if (snapshot.exists()) {
                     statusDot.className = 'dot online';
-                    statusText.innerText = "Online";
+                    statusText.innerText = "Online (Realtime)";
                     isConnected = true;
-                    log("DB Connected Successfully");
-                })
-                .catch(e => {
-                    statusDot.className = 'dot offline';
-                    statusText.innerText = "Offline";
-                    log(`DB Error: ${e.message}`);
-                });
+                    log("Connected to Realtime DB");
+                } else {
+                    statusDot.className = 'dot online';
+                    statusText.innerText = "Online (Empty)";
+                    isConnected = true;
+                    log("DB exists but is empty");
+                }
+            }).catch((error) => {
+                statusDot.className = 'dot offline';
+                statusText.innerText = "Offline";
+                log(`DB Error: ${error.message}`);
+            });
+
         } catch (e) {
             log(`Config Error: ${e.message}`);
-            alert("Config Firebase Salah. Cek Console.");
+            alert("Error Config Firebase");
         }
 
-        // --- FUNGSI DEBUG (Window Scope) ---
-        
-        // 1. Cek Database (Apakah collection ada?)
+        // --- DEBUG FUNCTIONS ---
         window.checkDB = async () => {
-            if(!db) return log("DB not initialized");
-            log("Checking collection 'codes'...");
+            if(!db) return log("DB not init");
+            log("Checking 'codes' node...");
             try {
-                const snap = await getDocs(collection(db, "codes"));
-                log(`Success! Found ${snap.size} documents in 'codes'.`);
-                showToast(`Ditemukan ${snap.size} data kode`, "success");
+                const codesRef = ref(db, 'codes'); // Membaca node 'codes'
+                const snapshot = await get(codesRef);
+                if (snapshot.exists()) {
+                    const count = Object.keys(snapshot.val()).length;
+                    log(`Found ${count} codes in 'codes'`);
+                    showToast(`Ditemukan ${count} kode`, "success");
+                } else {
+                    log("Node 'codes' does NOT exist or is empty");
+                    showToast("Node 'codes' tidak ditemukan", "error");
+                }
             } catch (e) {
-                log(`Error reading codes: ${e.message}`);
-                showToast("Gagal baca collection codes", "error");
+                log(`Read Error: ${e.message}`);
             }
         };
 
-        // 2. Tampilkan Isi Kode (Untuk Admin)
         window.showCodes = async () => {
-            if(!db) return log("DB not initialized");
-            log("Fetching all codes...");
+            if(!db) return;
             try {
-                const snap = await getDocs(collection(db, "codes"));
-                let output = "";
-                snap.forEach(doc => {
-                    const d = doc.data();
-                    output += `Code: ${d.code} | Status: ${d.status}\n`;
-                });
-                log("Data fetched (Check Alert)");
-                alert(output || "Tidak ada data kode!");
+                const snapshot = await get(ref(db, 'codes'));
+                if (snapshot.exists()) {
+                    const data = snapshot.val();
+                    let output = "";
+                    Object.keys(data).forEach(key => {
+                        const item = data[key];
+                        output += `Key: ${key} | Code: ${item.code} | Status: ${item.status}\n`;
+                    });
+                    alert(output);
+                } else {
+                    alert("Data kosong");
+                }
             } catch (e) {
-                log(`Error fetching: ${e.message}`);
+                log(e.message);
             }
         };
 
-        // --- LOGIKA REDEEM ---
+        // --- LOGIC REDEEM ---
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             if (!isConnected) return showToast("Database Offline", "error");
 
-            const code = document.getElementById('code').value.trim();
-            if(!code) return showToast("Isi kode", "error");
+            const inputCode = document.getElementById('code').value.trim();
+            if(!inputCode) return showToast("Isi kode", "error");
 
             setLoading(true);
-            log(`Trying to redeem code: ${code}`);
+            log(`Trying to redeem: ${inputCode}`);
 
             try {
-                // Cek Kode
-                const q = query(collection(db, "codes"), where("code", "==", code), where("status", "==", "active"), limit(1));
-                const snap = await getDocs(q);
+                // 1. Cari Kode (Kita ambil semua dulu, cari manual)
+                const snapshot = await get(ref(db, 'codes'));
+                
+                let foundKey = null;
+                let codeData = null;
 
-                if (snap.empty) {
-                    log(`Code '${code}' not found or inactive.`);
-                    // Debugging: Coba cari tanpa filter status untuk melihat apakah kodenya memang ada tapi statusnya 'used'
-                    const qAll = query(collection(db, "codes"), where("code", "==", code), limit(1));
-                    const snapAll = await getDocs(qAll);
-                    if(!snapAll.empty) {
-                        const statusReal = snapAll.docs[0].data().status;
-                        showToast(`Kode ada, tapi statusnya: ${statusReal}`, "error");
-                        log(`Code exists but status is '${statusReal}'`);
-                    } else {
-                        showToast("Kode tidak ditemukan di database", "error");
+                if (snapshot.exists()) {
+                    const allCodes = snapshot.val();
+                    // Loop mencari kode yang cocok dan status active
+                    for (const key in allCodes) {
+                        if (allCodes[key].code === inputCode && allCodes[key].status === 'active') {
+                            foundKey = key;
+                            codeData = allCodes[key];
+                            break;
+                        }
                     }
+                }
+
+                if (!foundKey) {
+                    log(`Code '${inputCode}' not found or not active`);
+                    showToast("Kode tidak valid atau kadaluarsa", "error");
                     setLoading(false);
                     return;
                 }
 
-                const codeRef = doc(db, "codes", snap.docs[0].id);
-                log("Code is Valid. Fetching Accounts...");
+                log("Code Valid. Fetching Accounts...");
 
-                // Ambil Akun
-                const qAcc = query(collection(db, "accounts"), where("status", "==", "active"), limit(50));
-                const snapAcc = await getDocs(qAcc);
-                
-                if (snapAcc.empty) {
+                // 2. Ambil Akun (Dari node 'accounts')
+                const accSnapshot = await get(ref(db, 'accounts'));
+                let activeAccounts = [];
+
+                if (accSnapshot.exists()) {
+                    const allAccs = accSnapshot.val();
+                    for (const key in allAccs) {
+                        if (allAccs[key].status === 'active') {
+                            activeAccounts.push({ key: key, data: allAccs[key] });
+                        }
+                    }
+                }
+
+                if (activeAccounts.length === 0) {
                     showToast("Stok Akun Habis", "error");
                     setLoading(false);
                     return;
                 }
 
-                const list = [];
-                snapAcc.forEach(d => list.push({id:d.id, data:d.data()}));
-                const chosen = list[Math.floor(Math.random() * list.length)];
-                
-                log(`Account selected: ${chosen.data.email}`);
+                // Random
+                const randomIndex = Math.floor(Math.random() * activeAccounts.length);
+                const chosenAccount = activeAccounts[randomIndex];
+                log(`Selected Acc: ${chosenAccount.data.email}`);
 
-                // Update Transaksi
-                await runTransaction(db, async (t) => {
-                    const accRef = doc(db, "accounts", chosen.id);
-                    const accDoc = await t.get(accRef);
-                    if(accDoc.data().status !== "active") throw "Conflict";
-                    t.update(accRef, {status: "used"});
-                    t.update(codeRef, {status: "used"});
-                });
+                // 3. Update Status (Kode jadi used, Akun jadi used)
+                // Update Kode
+                await update(ref(db, 'codes/' + foundKey), { status: 'used' });
+                // Update Akun
+                await update(ref(db, 'accounts/' + chosenAccount.key), { status: 'used' });
 
-                log("Redeem Success!");
-                document.getElementById('res-email').innerText = chosen.data.email;
-                document.getElementById('res-pass').innerText = chosen.data.password;
+                log("Update Success!");
+                document.getElementById('res-email').innerText = chosenAccount.data.email;
+                document.getElementById('res-pass').innerText = chosenAccount.data.password;
                 resultArea.style.display = 'block';
                 showToast("Berhasil!", "success");
                 form.reset();
 
             } catch (err) {
                 log(`Error: ${err.message}`);
-                showToast("Terjadi kesalahan sistem", "error");
+                showToast("Gagal mengambil akun", "error");
             } finally {
                 setLoading(false);
             }
         });
 
-        // Helpers
         function setLoading(l) {
             submitBtn.disabled = l;
             btnText.style.display = l ? 'none' : 'block';
