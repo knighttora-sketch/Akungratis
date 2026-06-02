@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Redeem Akun (Fixed)</title>
+    <title>Redeem Akun (Fixed Path)</title>
     <style>
         :root {
             --primary: #6366f1; --bg: #0f172a; --card: #1e293b; --text: #f8fafc;
@@ -102,7 +102,7 @@
     <!-- Notifikasi -->
     <div id="toast" class="toast">Pesan</div>
 
-    <!-- SCRIPT JAVASCRIPT (SUDAH DIPERBAIKI) -->
+    <!-- SCRIPT JAVASCRIPT (UPDATED & FIXED) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
         import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
@@ -164,21 +164,21 @@
 
         // --- DEBUG FUNCTION ---
         window.checkDB = async () => {
+            // Path sesuai scan terakhir: codes/accounts
             try {
-                const snapshot = await get(ref(db, 'codes/accounts'));
+                const snapshot = await get(ref(db, 'codes/accounts')); 
                 if (snapshot.exists()) {
-                    const allAccs = snapshot.val();
-                    let activeCount = 0;
-                    for (const key in allAccs) {
-                        if (allAccs[key].status && allAccs[key].status.toLowerCase() === 'active') {
-                            activeCount++;
-                        }
+                    const all = snapshot.val();
+                    let count = 0;
+                    for (const k in all) {
+                        // Hitung yang BUKAN 'used'
+                        const s = all[k].status ? all[k].status.toLowerCase() : '';
+                        if (s !== 'used') count++;
                     }
-                    log(`Total Akun: ${Object.keys(allAccs).length}`);
-                    log(`Total Active: ${activeCount}`);
-                    showToast(`Stok Tersedia: ${activeCount}`, activeCount > 0 ? "success" : "error");
+                    showToast(`Tersedia: ${count} akun`, count>0?"success":"error");
+                    log(`Total Akun: ${Object.keys(all).length} | Siap Pakai: ${count}`);
                 } else {
-                    log("Data accounts kosong!");
+                    showToast("Data kosong", "error");
                 }
             } catch (e) { log(e.message); }
         };
@@ -195,73 +195,76 @@
             log(`Redeem attempt: ${inputCode}`);
 
             try {
-                // 1. VALIDASI KODE
-                const codeSnapshot = await get(ref(db, 'codes'));
-                let foundCodeKey = null;
+                // 1. CEK KODE
+                const snapCode = await get(ref(db, 'codes'));
+                let codeKey = null;
+                
+                if (snapCode.exists()) {
+                    const data = snapCode.val();
+                    // Loop mencari kode di dalam node 'codes'
+                    for (const key in data) {
+                        // Lewati node 'accounts' karena itu tempat stok akun
+                        if (key === 'accounts') continue;
 
-                if (codeSnapshot.exists()) {
-                    const allCodes = codeSnapshot.val();
-                    for (const key in allCodes) {
-                        // Case insensitive check
-                        if (allCodes[key].code && 
-                            allCodes[key].code.toLowerCase() === inputCode.toLowerCase() && 
-                            allCodes[key].status && 
-                            allCodes[key].status.toLowerCase() === 'active') {
-                            
-                            foundCodeKey = key;
+                        const item = data[key];
+                        // Cek kode (Case Insensitive) & Status (Case Insensitive)
+                        if (item.code && item.code.toLowerCase() === inputCode.toLowerCase() && 
+                            item.status && item.status.toLowerCase() === 'active') {
+                            codeKey = key; 
                             break;
                         }
                     }
                 }
 
-                if (!foundCodeKey) {
-                    log("Kode Invalid / Kadaluarsa");
-                    showToast("Kode salah atau sudah dipakai", "error");
+                if (!codeKey) {
+                    log("Kode tidak valid/sudah dipakai");
+                    showToast("Kode Salah/Used", "error");
                     setLoading(false);
                     return;
                 }
 
                 log("Kode Valid. Mencari Akun...");
 
-                // 2. AMBIL AKUN ACTIVE
-                const accSnapshot = await get(ref(db, 'codes/accounts'));
-                let activeAccounts = [];
+                // 2. AMBIL AKUN
+                // Path sesuai scan: codes/accounts
+                const snapAcc = await get(ref(db, 'codes/accounts'));
+                let availableAccounts = [];
 
-                if (accSnapshot.exists()) {
-                    const allAccs = accSnapshot.val();
-                    
-                    for (const key in allAccs) {
-                        const item = allAccs[key];
-                        // Safe Check: Pastikan status ada dan equals active
-                        if (item && item.status && item.status.toLowerCase() === 'active') {
-                            activeAccounts.push({ key: key, data: item });
+                if (snapAcc.exists()) {
+                    const allAcc = snapAcc.val();
+                    for (const k in allAcc) {
+                        const item = allAcc[k];
+                        // LOGIKA BARU: Ambil jika status TIDAK SAMA DENGAN 'used'
+                        const status = item.status ? item.status.toLowerCase() : '';
+                        
+                        if (status !== 'used') {
+                            availableAccounts.push({ key: k, data: item });
                         }
                     }
                 }
 
-                log(`Ditemukan ${activeAccounts.length} akun active.`);
+                log(`Ditemukan ${availableAccounts.length} akun siap pakai.`);
 
-                if (activeAccounts.length === 0) {
-                    showToast("Stok Akun Habis (Benar-benar kosong)", "error");
+                if (availableAccounts.length === 0) {
+                    showToast("Stok Akun Habis (Semua Used)", "error");
                     setLoading(false);
                     return;
                 }
 
-                // 3. RANDOM UPDATE
-                const randomIndex = Math.floor(Math.random() * activeAccounts.length);
-                const chosen = activeAccounts[randomIndex];
-
-                log(`Mengambil Akun: ${chosen.data.email}`);
-
-                // Update Kode jadi Used
-                await update(ref(db, 'codes/' + foundCodeKey), { status: 'used' });
+                // 3. RANDOM & UPDATE
+                const pick = availableAccounts[Math.floor(Math.random() * availableAccounts.length)];
                 
-                // Update Akun jadi Used
-                await update(ref(db, 'accounts/' + chosen.key), { status: 'used' });
+                log(`Mengambil Akun: ${pick.data.email}`);
+
+                // Update Kode (di path codes/Afton)
+                await update(ref(db, 'codes/' + codeKey), { status: 'used' });
+                
+                // Update Akun (di path codes/accounts/key)
+                await update(ref(db, 'codes/accounts/' + pick.key), { status: 'used' });
 
                 // 4. SUKSES
-                document.getElementById('res-email').innerText = chosen.data.email;
-                document.getElementById('res-pass').innerText = chosen.data.password;
+                document.getElementById('res-email').innerText = pick.data.email;
+                document.getElementById('res-pass').innerText = pick.data.password;
                 resultArea.style.display = 'block';
                 showToast("Berhasil!", "success");
                 form.reset();
